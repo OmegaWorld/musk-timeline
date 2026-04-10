@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>马斯克最近3个月发言时间线</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      padding: 30px 20px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    h1 {
+      font-size: 32px;
+      background: linear-gradient(90deg, #1a1a2e, #e94560);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 15px;
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: bold;
+      color: #e94560;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 3px;
+    }
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, #e94560, #0f3460, #16213e);
+      border-radius: 2px;
+    }
+    .month-group {
+      margin-bottom: 30px;
+    }
+    .month-title {
+      background: linear-gradient(90deg, #e94560, #0f3460);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 25px;
+      display: inline-block;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 4px 15px rgba(233,69,96,0.4);
+    }
+    .event {
+      position: relative;
+      width: 45%;
+      padding: 20px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .event:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .event.left {
+      margin-left: 5%;
+    }
+    .event.right {
+      margin-left: 50%;
+    }
+    .event::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 4px solid;
+      border-radius: 50%;
+    }
+    .event.left::before {
+      right: -32px;
+      border-color: #e94560;
+    }
+    .event.right::before {
+      left: -32px;
+      border-color: #0f3460;
+    }
+    .event::after {
+      content: '';
+      position: absolute;
+      top: 32px;
+      width: 25px;
+      height: 3px;
+      background: #ddd;
+    }
+    .event.left::after {
+      right: -25px;
+    }
+    .event.right::after {
+      left: -25px;
+    }
+    .event-date {
+      font-size: 13px;
+      color: #e94560;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .event-source {
+      font-size: 11px;
+      color: #999;
+      background: #f5f5f5;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .event-title {
+      font-size: 17px;
+      font-weight: bold;
+      color: #1a1a2e;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .event-content {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+      background: #f8f9fa;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border-left: 4px solid #e94560;
+    }
+    .event-category {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .cat-spacex { background: #e3f2fd; color: #1565c0; }
+    .cat-tesla { background: #fff3e0; color: #e65100; }
+    .cat-x { background: #f3e5f5; color: #7b1fa2; }
+    .cat-grok { background: #e8f5e9; color: #2e7d32; }
+    .cat-doge { background: #fce4ec; color: #c2185b; }
+    .cat-other { background: #eceff1; color: #455a64; }
+    
+    .quote {
+      font-style: italic;
+      color: #666;
+      border-left: 3px solid #e94560;
+      padding-left: 12px;
+      margin: 8px 0;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+    }
+    
+    @media (max-width: 768px) {
+      .timeline::before { left: 20px; }
+      .event { width: calc(100% - 50px); margin-left: 50px !important; }
+      .event::before { left: -32px !important; right: auto !important; }
+      .event::after { left: -25px !important; right: auto !important; }
+      .stats { flex-direction: column; gap: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 埃隆·马斯克发言时间线</h1>
+      <p class="subtitle">2026年1月10日 - 4月10日 | 含社交媒体发言</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num">20+</div>
+          <div class="stat-label">重要发言</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">5</div>
+          <div class="stat-label">涉及领域</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">3</div>
+          <div class="stat-label">月份数</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="timeline">
+      <!-- 2026年4月 -->
+      <div class="month-group">
+        <div class="month-title">📅 2026年4月</div>
+        
+        <div class="event right">
+          <div class="event-date">
+            4月3日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-spacex">SpaceX</span>
+          <div class="event-title">星舰下次飞行预告</div>
+          <div class="event-content">
+            <p class="quote">"星舰的下一次飞行以及V3飞船与助推器的首次飞行预计在4至6周后。"</p>
+            马斯克在X平台公布星舰最新进展，V3版本设计正在完善中。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            4月1日
+            <span class="event-source">特斯拉官方</span>
+          </div>
+          <span class="event-category cat-tesla">Tesla</span>
+          <div class="event-title">Model 3全球热销超300万辆</div>
+          <div class="event-content">
+            特斯拉通过官微宣布Model 3全球热销超300万辆。马斯克持续推动特斯拉在全球的产能扩张。
+          </div>
+        </div>
+      </div>
+
+      <!-- 2026年3月 -->
+      <div class="month-group">
+        <div class="month-title">📅 2026年3月</div>
+        
+        <div class="event right">
+          <div class="event-date">
+            3月27日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">印尼年龄限制调整</div>
+          <div class="event-content">
+            X平台宣布自3月28日起，印尼用户必须年满16岁才能创建账户。马斯克回应印尼政府监管要求。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            3月26日
+            <span class="event-source">欧盟公告</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">欧盟罚款与整改</div>
+          <div class="event-content">
+            欧盟委员会对X平台罚款1.2亿欧元后，X同意修改其在欧盟的认证机制。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            3月24日
+            <span class="event-source">法院文件</span>
+          </div>
+          <span class="event-category cat-doge">DOGE</span>
+          <div class="event-title">因DOGE时期行为遭起诉</div>
+          <div class="event-content">
+            马斯克因政府效率部（DOGE）时期涉嫌越权裁员与削减资金而遭起诉。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            3月18日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">X平台调整印尼年龄限制</div>
+          <div class="event-content">
+            为符合印尼政府新规，X平台宣布将印尼用户最低年龄限制调整为16岁。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            3月12日
+            <span class="event-source">欧盟声明</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">欧盟同意X修改认证机制</div>
+          <div class="event-content">
+            欧盟委员会发言人透露，X公司被罚款1.2亿欧元后已同意修改在欧盟的认证机制。
+          </div>
+        </div>
+      </div>
+
+      <!-- 2026年2月 -->
+      <div class="month-group">
+        <div class="month-title">📅 2026年2月</div>
+        
+        <div class="event left">
+          <div class="event-date">
+            2月22日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-spacex">SpaceX</span>
+          <div class="event-title">星舰下月再次试飞</div>
+          <div class="event-content">
+            <p class="quote">"星舰火箭将于下个月再次试飞。"</p>
+            马斯克在X平台宣布星舰最新试飞计划。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            2月20日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-spacex">SpaceX</span>
+          <div class="event-title">星舰每年发射超10000颗卫星</div>
+          <div class="event-content">
+            马斯克表示星舰未来每年将发射超过10000颗卫星，加速星链建设。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            2月19日
+            <span class="event-source">英国政府</span>
+          </div>
+          <span class="event-category cat-grok">Grok AI</span>
+          <div class="event-title">英国调查Grok滥用问题</div>
+          <div class="event-content">
+            英国政府提出新规，要求科技公司在48小时内删除侮辱性图片。X平台用户利用Grok生成大量不当内容引发关注。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            2月16日
+            <span class="event-source">爱尔兰监管</span>
+          </div>
+          <span class="event-category cat-grok">Grok AI</span>
+          <div class="event-title">爱尔兰调查Grok色情图像问题</div>
+          <div class="event-content">
+            爱尔兰数据保护委员会对X平台展开调查，重点关注Grok生成色情图像问题。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            2月6日
+            <span class="event-source">特斯拉中国</span>
+          </div>
+          <span class="event-category cat-tesla">Tesla</span>
+          <div class="event-title">中国AI训练中心投入使用</div>
+          <div class="event-content">
+            特斯拉副总裁陶琳表示，特斯拉在中国已自主投入并使用了一家AI训练中心。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            2月3日
+            <span class="event-source">法国检方</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">法国突袭X办公室</div>
+          <div class="event-content">
+            <p class="quote">"这是一场政治攻击。"</p>
+            法国警方突袭X法国办公室，调查算法操纵指控。马斯克在X平台强硬回应，称法国应将精力放在打击性犯罪上。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            2月1日
+            <span class="event-source">印尼政府</span>
+          </div>
+          <span class="event-category cat-grok">Grok AI</span>
+          <div class="event-title">印尼有条件解封Grok</div>
+          <div class="event-content">
+            印尼政府有条件解封X平台内置的Grok聊天机器人，此前因担忧生成色情内容而临时封禁。
+          </div>
+        </div>
+      </div>
+
+      <!-- 2026年1月 -->
+      <div class="month-group">
+        <div class="month-title">📅 2026年1月</div>
+        
+        <div class="event right">
+          <div class="event-date">
+            1月26日
+            <span class="event-source">欧盟委员会</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">欧盟启动对X正式调查</div>
+          <div class="event-content">
+            欧盟依据《数字服务法案》对X平台启动正式调查，重点评估Grok可能引发的风险。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            1月24日
+            <span class="event-source">特斯拉官方</span>
+          </div>
+          <span class="event-category cat-tesla">Tesla</span>
+          <div class="event-title">发布8000元保险补贴</div>
+          <div class="event-content">
+            特斯拉发布8000元保险补贴促销方案，继续推动中国市场销售。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            1月20日
+            <span class="event-source">GitHub</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">X平台算法正式开源</div>
+          <div class="event-content">
+            X平台正式将内容推荐算法开源，代码已在GitHub上公开访问。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            1月15日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-spacex">SpaceX</span>
+          <div class="event-title">星舰每小时发射一次</div>
+          <div class="event-content">
+            <p class="quote">"星舰在未来数年内，可能实现每小时发射一次以上的飞行频率。"</p>
+            马斯克在X平台描绘星舰未来发展愿景。
+          </div>
+        </div>
+
+        <div class="event right">
+          <div class="event-date">
+            1月15日
+            <span class="event-source">香港私隐专员公署</span>
+          </div>
+          <span class="event-category cat-grok">Grok AI</span>
+          <div class="event-title">香港关注Grok安全问题</div>
+          <div class="event-content">
+            香港个人资料私隐专员公署发文关注Grok可被用于生成不雅照片的问题，正主动联络相关机构。
+          </div>
+        </div>
+
+        <div class="event left">
+          <div class="event-date">
+            1月10日
+            <span class="event-source">X平台</span>
+          </div>
+          <span class="event-category cat-x">X平台</span>
+          <div class="event-title">预告开源X算法</div>
+          <div class="event-content">
+            <p class="quote">"将在一周内正式开源X平台最新的内容推荐算法。"</p>
+            马斯克承诺开源所有用于内容推荐的代码，每四周更新一次。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>📊 数据来源：百度百科、央视新闻、界面新闻等公开报道</p>
+      <p style="margin-top: 8px;">生成时间：2026年4月10日 | 🦞 StockClaw 制作</p>
+    </footer>
+  </div>
+</body>
+</html>
